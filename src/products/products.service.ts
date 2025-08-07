@@ -4,13 +4,13 @@ import {
   InternalServerErrorException,
   Logger,
   NotFoundException,
-  ParseUUIDPipe,
 } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { PaginationDTO } from 'src/common/dtos/pagination.dto';
 import { Product } from './entities/product.entity';
 
 export interface IErrorsTypeORM {
@@ -69,8 +69,12 @@ export class ProductsService {
     }
   }
 
-  findAll() {
-    return this.productRepository.find();
+  findAll(paginationDTO: PaginationDTO) {
+    const { limit = 10, offset = 5 } = paginationDTO;
+    return this.productRepository.find({
+      take: limit,
+      skip: offset,
+    });
   }
 
   async findOne(id: string) {
