@@ -1,7 +1,11 @@
+import type { Response } from 'express';
 import {
   BadRequestException,
   Controller,
+  Get,
+  Param,
   Post,
+  Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
@@ -14,6 +18,17 @@ import { fileFilter, renameFile } from './helpers';
 @Controller('files')
 export class FilesController {
   constructor(private readonly filesService: FilesService) {}
+
+  @Get('product/:imageName')
+  findOneProductImage(
+    @Res() res: Response,
+    @Param('imageName') imageName: string,
+  ) {
+    const path = this.filesService.getStaticFileUploadImage(imageName);
+
+    // res.status(403).json({ ok: false, path });
+    res.sendFile(path);
+  }
 
   @Post('product')
   @UseInterceptors(
@@ -30,6 +45,6 @@ export class FilesController {
     if (!file)
       throw new BadRequestException('Make sure that the file is an image');
     console.log({ fileInController: file });
-    return { filename: file.originalname };
+    return { securityUrl: file.filename };
   }
 }
