@@ -1,10 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
@@ -14,44 +8,7 @@ import { PaginationDTO } from 'src/common/dtos/pagination.dto';
 
 import { validate as isUUID } from 'uuid';
 import { Product, ProductImage } from './entities';
-
-export interface IErrorsTypeORM {
-  length: number;
-  severity: string;
-  code: string;
-  detail: string;
-  hint: string;
-  position: string;
-  internalPosition: string;
-  internalQuery: string;
-  where: string;
-  schema: string;
-  table: string;
-  column: string;
-  dataType: string;
-  constraint: string;
-  file: string;
-  line: string;
-  routine: string;
-  driverError: IDriverError;
-}
-
-export interface IDriverError {
-  length: number;
-  severity: string;
-  code: string;
-  detail: string;
-  hint: string;
-  position: string;
-  internalPosition: string;
-  internalQuery: string;
-  where: string;
-  schema: string;
-  table: string;
-  column: string;
-  dataType: string;
-  constraint: string;
-}
+import { ErrorService } from 'src/common/error.service';
 
 @Injectable()
 export class ProductsService {
@@ -65,6 +22,7 @@ export class ProductsService {
     private readonly productImageRepository: Repository<ProductImage>,
 
     private readonly dataSource: DataSource,
+    public errorService: ErrorService,
   ) {}
 
   async create(createProductDto: CreateProductDto) {
@@ -81,7 +39,7 @@ export class ProductsService {
 
       return { ...product, images };
     } catch (error) {
-      this.handleDBExceptions(error);
+      this.errorService.handleDBExceptions(error);
     }
   }
 
@@ -161,7 +119,7 @@ export class ProductsService {
     } catch (error) {
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
-      this.handleDBExceptions(error);
+      this.errorService.handleDBExceptions(error);
     }
   }
 
@@ -170,24 +128,13 @@ export class ProductsService {
     await this.productRepository.remove(product);
   }
 
-  private handleDBExceptions(error: IErrorsTypeORM) {
-    console.log(error);
-    if (error.code === '23505') {
-      throw new BadRequestException(error.detail);
-    }
-    this.logger.error(error);
-    throw new InternalServerErrorException(
-      'Unexpected error, check server logs',
-    );
-  }
-
   async deleteAllProducts() {
     const query = this.productRepository.createQueryBuilder('product');
 
     try {
       return await query.delete().where({}).execute();
     } catch (error) {
-      this.handleDBExceptions(error);
+      this.errorService.handleDBExceptions(error);
     }
   }
 }
