@@ -1,11 +1,20 @@
-import { Controller, Post, Body, Get, UseGuards, Req } from '@nestjs/common';
+import type { Request } from 'express';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  UseGuards,
+  Req,
+  Headers,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import type { IncomingHttpHeaders } from 'http';
 
 import { AuthService } from './auth.service';
 import { CreateUserDto, LoginUserDto } from './dto';
 import { GetUser } from './decoratos/get-user.decorator';
 import { User } from './entities/user.entity';
-import type { Request } from 'express';
 import { RawHeaders } from './decoratos/raw-headers.decorator';
 
 @Controller('auth')
@@ -29,12 +38,14 @@ export class AuthController {
     @GetUser() user: User,
     @GetUser('email') userEmail: string,
     @RawHeaders() rawHeaders: string[],
+    @Headers() headers: IncomingHttpHeaders,
   ) {
     return {
       ok: true,
       user,
       userEmail,
       rawHeaders,
+      headers,
     };
   }
 }
