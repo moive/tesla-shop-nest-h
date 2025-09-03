@@ -14,9 +14,9 @@ import type { IncomingHttpHeaders } from 'http';
 
 import { AuthService } from './auth.service';
 import { CreateUserDto, LoginUserDto } from './dto';
-import { GetUser } from './decoratos/get-user.decorator';
+import { GetUser } from './decorators/get-user.decorator';
 import { User } from './entities/user.entity';
-import { RawHeaders } from './decoratos/raw-headers.decorator';
+import { RawHeaders } from './decorators/raw-headers.decorator';
 import { UserRoleGuard } from './guards/user-role/user-role.guard';
 
 @Controller('auth')
